@@ -12,7 +12,7 @@
 
 
 #define NUM_FRAMES		20
-#define MARKERS_PORT1	2
+#define MARKERS_PORT1	4
 #define MARKERS_PORT2	0
 #define MARKERS_PORT3	0
 #define MARKERS_PORT4	0

@@ -71,6 +71,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColorCorrectRate.cs" />
     <Compile Include="FullScreen.cs" />
     <Compile Include="NDILib.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

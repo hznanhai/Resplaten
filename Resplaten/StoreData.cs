@@ -22,51 +22,89 @@ namespace Resplaten
         private int dataRowNum = 2;
 
         private BackgroundWorker backgroundWorker;
-        private ExcelData[] allDataList;
+        private CollectData[] allDataList;
         private int allDataLength;
-        public bool storeCompleted = false;
+        public bool calculCompleted = false;
         public bool inputDataCompleted = false;
 
-        public struct ExcelData {
+        public double maxSpeed=0, maxGrasp=0;
+        public string pictureName, selectColor;
+        public double reactionTime;
+
+        NDILib.Position3d position3D0, position3D1, position3D2;
+
+        public struct CollectData {
             public string picName;
-            public bool direct;
-            public double time;
-            public float x;
-            public float y;
-            public float z;
-            public double m_range;
-            public double m_speed;
-            public double m_acce;
-            public ExcelData(string picName,bool direct,double time, float x, float y, float z, double range, double speed, double acce) {
+            public double timespan;
+            public NDILib.Position3d position0, position1, position2;
+            public CollectData(string picName,double timespan,NDILib.Position3d position0,NDILib.Position3d position1,NDILib.Position3d position2) {
                 this.picName = picName;
-                this.direct = direct;
-                this.time = time;
-                this.x = x;
-                this.y = y;
-                this.z = z;
-                this.m_range = range;
-                this.m_speed = speed;
-                this.m_acce = acce;
+                this.timespan = timespan;
+                this.position0 = position0;
+                this.position1 = position1;
+                this.position2 = position2;
             }
         }
 
         public StoreData(){
             initExcel();
-            allDataList = new ExcelData[65535];
+            allDataList = new CollectData[65535];
             allDataLength = 0;
             backgroundWorker = new BackgroundWorker();
             backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
             backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(backgroundWorker_RunWorkerCompleted);
-            backgroundWorker.RunWorkerAsync();
         }
 
         void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.storeCompleted = true;
+            this.calculCompleted = true;
+            allDataLength = 0;
         }
 
         void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            maxSpeed = 0;
+            maxGrasp = 0;
+            NDILib.Position3d oldposition = allDataList[0].position2;
+            double oldtime = allDataList[0].timespan;
+            double oldspeed = 0;
+            for (int i = 0; i < allDataLength;i++ ) { 
+                position3D0=allDataList[i].position0;
+                position3D1=allDataList[i].position1;
+                position3D2=allDataList[i].position2;
+
+                double distance = Math.Sqrt((position3D0.x - position3D1.x) * (position3D0.x - position3D1.x) + 
+                                            (position3D0.y - position3D1.y) * (position3D0.y - position3D1.y) +
+                                            (position3D0.z - position3D1.z) * (position3D0.z - position3D1.z));
+
+                Console.WriteLine("distance:"+distance);
+                if (distance>maxGrasp){
+                    maxGrasp = distance;
+                }
+
+                Console.WriteLine("x,y,z:" + position3D0.x + "  " + position3D0.y + "  " + position3D0.z);
+                Console.WriteLine("x,y,z:" + position3D1.x + "  " + position3D1.y + "  " + position3D1.z);
+                Console.WriteLine("x,y,z:" + position3D2.x + "  " + position3D2.y + "  " + position3D2.z);
+                double time = allDataList[i].timespan - oldtime;
+                Console.WriteLine("time:"+ allDataList[i].timespan + "   "+oldtime);
+                if (time != 0){
+                    double range = Math.Sqrt((position3D2.x - oldposition.x) * (position3D2.x - oldposition.x)+
+                                             (position3D2.y - oldposition.y) * (position3D2.y - oldposition.y)+
+                                             (position3D2.z - oldposition.z) * (position3D2.z - oldposition.z));
+                    double speed = range / time;
+                    double acce = (speed - oldspeed) / time;
+                    Console.WriteLine("speed:"+speed);
+                    Console.WriteLine("acce: "+acce);
+                    if (acce < 15 && acce > -15){
+                        if (speed>maxSpeed){
+                            maxSpeed = speed;
+                        }
+                        oldposition = position3D2;
+                        oldtime = allDataList[i].timespan;
+                        oldspeed = speed;
+                    }
+                }
+            }
         }
 
         private void initExcel() {
@@ -77,25 +115,49 @@ namespace Resplaten
                 workbook = workbooks.Add(XlWBATemplate.xlWBATWorksheet);
                 worksheet =(Worksheet) workbook.Worksheets[1];
 
-                worksheet.Cells[1, 1] = "Frame";
+                worksheet.Cells[1, 1] = "No";
                 worksheet.Cells[1, 2] = "Picture";
-                worksheet.Cells[1, 3] = "Direction";
-                worksheet.Cells[1, 4] = "Time";
-                worksheet.Cells[1, 5] = "X";
-                worksheet.Cells[1, 6] = "Y";
-                worksheet.Cells[1, 7] = "Z";
-                worksheet.Cells[1, 8] = "Range";
-                worksheet.Cells[1, 9] = "Speed";
-                worksheet.Cells[1, 10] = "Acceleration";
-
+                worksheet.Cells[1, 3] = "Time";
+                worksheet.Cells[1, 4] = "CorrectRate";
+                worksheet.Cells[1, 5] = "MaxGrasp";
+                worksheet.Cells[1, 6] = "MaxSpeed";
+                worksheet.Cells[1, 7] = "DetailData";
             }
             catch(Exception exp){
                 throw(exp);
             }
         }
 
-        public void addData(NDILib.Position3d position3D0,NDILib.Position3d position3D1,NDILib.Position3d position3D2,string picName,double timespan) { 
-            
+        public void addData(NDILib.Position3d position3D0,NDILib.Position3d position3D1,NDILib.Position3d position3D2,string picName,double timespan) {
+            allDataList[allDataLength] = new CollectData(picName,timespan,position3D0,position3D1,position3D2);
+            allDataLength++;
+        }
+
+        public void calculData() {
+            backgroundWorker.RunWorkerAsync();
+        }
+
+        public void addSelectColor(string color) {
+            this.selectColor = color;
+        }
+
+        public void addReactionTime(double timespan) {
+            this.reactionTime = timespan;
+        }
+        
+        public void addPicName(string picName){
+            this.pictureName = picName;
+        }
+
+        public void addtoExcel() {
+            worksheet.Cells[dataRowNum, 1] = dataRowNum - 1;
+            worksheet.Cells[dataRowNum, 2] = pictureName;
+            worksheet.Cells[dataRowNum, 3] = reactionTime;
+            worksheet.Cells[dataRowNum, 4] = ColorCorrectRate.getCorrectRate(pictureName,selectColor);
+            worksheet.Cells[dataRowNum, 5] = maxGrasp;
+            worksheet.Cells[dataRowNum, 6] = maxSpeed;
+            worksheet.Cells[dataRowNum, 7] = selectColor;
+            dataRowNum++;
         }
 
         public void completed() {

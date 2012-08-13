@@ -2,11 +2,36 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Window1" Height="600" Width="800" Loaded="Window_Loaded" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp">
-    <Canvas Name="canvas">
+    <Canvas Name="canvas" Background="Black">
         <Image Name="centerImage" Height="488" Width="500" Canvas.Top="12"></Image>
-        <TextBox Width="500" Height="100" Name="colorTextbox" VerticalContentAlignment="Center" FontSize="40" Visibility="Hidden" BorderThickness="5"></TextBox>
-        <TextBlock Name="guideTextblock" Width="400" Height="200"  TextAlignment="Center" FontSize="30" Text="欢迎你来参加心理学实验，本实验的目的是研究知觉和抓握的关系，在实验中，你将完成两个任务，持续时间约1小时" TextWrapping="Wrap" Visibility="Hidden"></TextBlock>
-        <Label Name="crossLabel" Content="十" FontSize="20" HorizontalContentAlignment="Center"  Visibility="Hidden" Width="30" Height="40" VerticalContentAlignment="Center"></Label>
-        <Label Name="tipLabel" Content="请按住空格键..." FontSize="20" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="200" Visibility="Hidden"></Label>
+        <TextBlock Name="guideTextblock" Width="400" Height="200"  TextAlignment="Center" Foreground="White" FontSize="30" Text="欢迎你来参加心理学实验，本实验的目的是研究知觉和抓握的关系，在实验中，你将完成两个任务，持续时间约1小时" TextWrapping="Wrap" Visibility="Hidden"></TextBlock>
+        <TextBlock Name="crossLabel" FontSize="60"  Visibility="Hidden" Width="80" Height="80" TextAlignment="Center" Foreground="White">
+            <TextBlock.TextDecorations>
+                <TextDecoration PenOffset="10">
+                    <TextDecoration.Pen>
+                        <Pen Thickness="20"></Pen>
+                    </TextDecoration.Pen>
+                </TextDecoration>
+            </TextBlock.TextDecorations>
+            +
+        </TextBlock>
+        <Label Name="tipLabel" Content="请按住空格键..." FontSize="20" Foreground="White" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="200" Visibility="Hidden"></Label>
+        <StackPanel Width="160" Name="allStackPanel" Visibility="Hidden" Height="500">
+            <Label Height="40" Width="160" FontSize="25" HorizontalContentAlignment="Center" Foreground="White" VerticalContentAlignment="Center">所有颜色</Label>
+            <ListBox Name="allListbox" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Width="160" Height="450" MouseDoubleClick="allListbox_MouseDoubleClick">
+                <ListBoxItem FontSize="30" Height="60">红</ListBoxItem>
+                <ListBoxItem FontSize="30" Height="60">橙</ListBoxItem>
+                <ListBoxItem FontSize="30" Height="60">黄</ListBoxItem>
+                <ListBoxItem FontSize="30" Height="60">绿</ListBoxItem>
+                <ListBoxItem FontSize="30" Height="60">蓝</ListBoxItem>
+                <ListBoxItem FontSize="30" Height="60">紫</ListBoxItem>
+                <ListBoxItem FontSize="30" Height="60">黑</ListBoxItem>
+            </ListBox>
+        </StackPanel>
+        <StackPanel Width="160" Name="selectStackPanel" Visibility="Hidden" Height="500"> 
+            <Label Height="40" Width="160" FontSize="25" HorizontalContentAlignment="Center" Foreground="White" VerticalContentAlignment="Center">出现的颜色</Label>
+            <ListBox Name="selectListbox" HorizontalContentAlignment="Center" HorizontalAlignment="Center" Width="160" Height="450" MouseDoubleClick="selectListbox_MouseDoubleClick">
+            </ListBox>
+        </StackPanel>
     </Canvas>
 </Window>

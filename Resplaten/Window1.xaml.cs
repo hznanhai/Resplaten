@@ -57,8 +57,10 @@ namespace Resplaten
             backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
             backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(backgroundWorker_RunWorkerCompleted);
 
+
             ndiBW = new BackgroundWorker();
             ndiBW.DoWork += new DoWorkEventHandler(ndiBW_DoWork);
+            ndiBW.RunWorkerCompleted += new RunWorkerCompletedEventHandler(ndiBW_RunWorkerCompleted);
 
             storeData = new StoreData();
             sw = new Stopwatch();
@@ -67,10 +69,18 @@ namespace Resplaten
             rd = new Random();
         }
 
+        void ndiBW_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            storeData.calculData();
+        }
+
         void ndiBW_DoWork(object sender, DoWorkEventArgs e)
         {
             while (true){
                 get3DPosition();
+                Console.WriteLine("x,y,z:"+position3D0.x+"  "+position3D0.y+"  "+position3D0.z);
+                Console.WriteLine("x,y,z:" + position3D1.x + "  " + position3D1.y + "  " + position3D1.z);
+                Console.WriteLine("x,y,z:" + position3D2.x + "  " + position3D2.y + "  " + position3D2.z);
                 if (position3D0.x>MAX_NEGATIVE && position3D1.x>MAX_NEGATIVE && position3D2.x>MAX_NEGATIVE){
                     timespan = sw.Elapsed.TotalMilliseconds;
                     storeData.addData(position3D0,position3D1,position3D2,picName,timespan);
@@ -97,11 +107,15 @@ namespace Resplaten
                 this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new SetUIDelegate(checkSpcaePressed));
             }
             Thread.Sleep(2000);
+            ndiToStop = false;
+            ndiBW.RunWorkerAsync();
             this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new BindPicDispatcherDelegate(bindPic));
+            showTime = sw.Elapsed.TotalMilliseconds;            
             Thread.Sleep(1000);
             this.Dispatcher.BeginInvoke(DispatcherPriority.Background,new SetUIDelegate(unbindPic));
+            ndiToStop = true;
             Thread.Sleep(rd.Next(5000,7000));
-            this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new SetUIDelegate(showColorTextBox));
+            this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new SetUIDelegate(showColorList));
             processStarted = false;
             
         }
@@ -124,6 +138,7 @@ namespace Resplaten
                 ispressed = false;
             } */
         }
+
         private void settipLabelVisibility() {
             Console.WriteLine("setVisibility");
             if (tipLabel.Visibility == Visibility.Visible)
@@ -135,10 +150,10 @@ namespace Resplaten
             }
         }
 
-        private void showColorTextBox() {
-            colorTextbox.Text = "";
-            colorTextbox.Visibility = Visibility.Visible;
-            colorTextbox.Focus();
+        private void showColorList() {
+            initListBox();
+            this.allStackPanel.Visibility = Visibility.Visible;
+            this.selectStackPanel.Visibility = Visibility.Visible;
         }
 
         private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -148,7 +163,7 @@ namespace Resplaten
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //FullScreen.GoFullscreen(this);
+            FullScreen.GoFullscreen(this);
             setCanvasProperty();
             setImageFileInfo();
 
@@ -184,10 +199,59 @@ namespace Resplaten
             this.tipLabel.SetValue(Canvas.LeftProperty, (screenWidth - crossLabel.Width) * 1 / 2);
             this.tipLabel.SetValue(Canvas.TopProperty, 0.0);
 
-            //设置输入框的位置
-            this.colorTextbox.SetValue(Canvas.LeftProperty, (screenWidth - colorTextbox.Width) * 1 / 2);
-            this.colorTextbox.SetValue(Canvas.TopProperty, (screenHeight - colorTextbox.Height) * 1 / 2);
+            //设置颜色选框的位置
+            initListBox();
+            this.allStackPanel.SetValue(Canvas.LeftProperty, screenWidth *(1- 0.618) - allStackPanel.Width * 1 / 2);
+            this.allStackPanel.SetValue(Canvas.TopProperty, screenHeight * (1 - 0.618) - allStackPanel.Height * 1 / 2);
+            this.selectStackPanel.SetValue(Canvas.LeftProperty, screenWidth * 0.618 - selectStackPanel.Width * 1 / 2);
+            this.selectStackPanel.SetValue(Canvas.TopProperty, screenHeight * (1 - 0.618) - selectStackPanel.Height * 1 / 2);
+        }
 
+        private void initListBox() {
+            allListbox.Items.Clear();
+            selectListbox.Items.Clear();
+
+            ListBoxItem listBoxItem = new ListBoxItem();
+            listBoxItem.Content = "红";
+            listBoxItem.FontSize = 30;
+            listBoxItem.Height = 60;
+            allListbox.Items.Add(listBoxItem);
+
+            listBoxItem = new ListBoxItem();
+            listBoxItem.Content = "橙";
+            listBoxItem.FontSize = 30;
+            listBoxItem.Height = 60;
+            allListbox.Items.Add(listBoxItem);
+
+            listBoxItem = new ListBoxItem();
+            listBoxItem.Content = "黄";
+            listBoxItem.FontSize = 30;
+            listBoxItem.Height = 60;
+            allListbox.Items.Add(listBoxItem);
+
+            listBoxItem = new ListBoxItem();
+            listBoxItem.Content = "绿";
+            listBoxItem.FontSize = 30;
+            listBoxItem.Height = 60;
+            allListbox.Items.Add(listBoxItem);
+
+            listBoxItem = new ListBoxItem();
+            listBoxItem.Content = "蓝";
+            listBoxItem.FontSize = 30;
+            listBoxItem.Height = 60;
+            allListbox.Items.Add(listBoxItem);
+
+            listBoxItem = new ListBoxItem();
+            listBoxItem.Content = "紫";
+            listBoxItem.FontSize = 30;
+            listBoxItem.Height = 60;
+            allListbox.Items.Add(listBoxItem);
+
+            listBoxItem = new ListBoxItem();
+            listBoxItem.Content = "黑";
+            listBoxItem.FontSize = 30;
+            listBoxItem.Height = 60;
+            allListbox.Items.Add(listBoxItem);
         }
 
         private void setImageFileInfo()
@@ -242,7 +306,8 @@ namespace Resplaten
                 backgroundWorker.RunWorkerAsync(); 
             }
             else if (e.Key==Key.Enter && !processStarted){
-                this.colorTextbox.Visibility = Visibility.Hidden;
+                this.allStackPanel.Visibility = Visibility.Hidden;
+                this.selectStackPanel.Visibility = Visibility.Hidden;
                 recordData();
                 this.crossLabel.Visibility = Visibility.Visible;
                 reset();
@@ -251,6 +316,7 @@ namespace Resplaten
             else if (e.Key==Key.Escape){
                 FullScreen.ExitFullscreen(this);
                 storeData.inputDataCompleted = true;
+                storeData.completed();
                 Application.Current.Shutdown();
             }
         }
@@ -270,6 +336,7 @@ namespace Resplaten
             {
                 imageCount = threeRandom.getRandomNum();
                 picName = imagesFileInfo[imageCount].Name;
+                storeData.addPicName(picName);
                 this.crossLabel.Visibility = Visibility.Hidden;
                 bitmapImage = new BitmapImage(new Uri(imagesFileInfo[imageCount].FullName, UriKind.Absolute));
                 centerImage.Source = bitmapImage;
@@ -289,8 +356,13 @@ namespace Resplaten
             this.centerImage.Visibility = Visibility.Hidden;
         }
 
-        private void recordData() { 
-                
+        private void recordData() {
+            string choseColor = "";
+            foreach (ListBoxItem item in selectListbox.Items) {
+                choseColor += item.Content+",";
+            }
+            storeData.addSelectColor(choseColor);
+            storeData.addtoExcel();
         }
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
@@ -299,6 +371,7 @@ namespace Resplaten
                 if (!hasRecordTime)
                 {
                     releaseTime = sw.Elapsed.TotalMilliseconds;
+                    storeData.addReactionTime(releaseTime - showTime);
                     hasRecordTime = true;
                 }
             }
@@ -307,6 +380,20 @@ namespace Resplaten
         private void reset() {
             hasRecordTime = false;
             isSpacePressed = false;
+        }
+
+        private void allListbox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ListBoxItem selectItem = (ListBoxItem)allListbox.SelectedItem;
+            allListbox.Items.Remove(allListbox.SelectedItem);
+            selectListbox.Items.Add(selectItem);
+        }
+
+        private void selectListbox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ListBoxItem selectItem = (ListBoxItem)selectListbox.SelectedItem;
+            selectListbox.Items.Remove(selectListbox.SelectedItem);
+            allListbox.Items.Add(selectItem);
         }
     }
 }
