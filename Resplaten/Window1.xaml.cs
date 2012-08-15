@@ -81,10 +81,10 @@ namespace Resplaten
                 Console.WriteLine("x,y,z:"+position3D0.x+"  "+position3D0.y+"  "+position3D0.z);
                 Console.WriteLine("x,y,z:" + position3D1.x + "  " + position3D1.y + "  " + position3D1.z);
                 Console.WriteLine("x,y,z:" + position3D2.x + "  " + position3D2.y + "  " + position3D2.z);
-                if (position3D0.x>MAX_NEGATIVE && position3D1.x>MAX_NEGATIVE && position3D2.x>MAX_NEGATIVE){
+                //if (position3D0.x>MAX_NEGATIVE && position3D1.x>MAX_NEGATIVE && position3D2.x>MAX_NEGATIVE){
                     timespan = sw.Elapsed.TotalMilliseconds;
                     storeData.addData(position3D0,position3D1,position3D2,picName,timespan);
-                }
+                //}
                 if (ndiToStop){
                     break;
                 }
@@ -110,7 +110,7 @@ namespace Resplaten
             ndiToStop = false;
             ndiBW.RunWorkerAsync();
             this.Dispatcher.BeginInvoke(DispatcherPriority.Background, new BindPicDispatcherDelegate(bindPic));
-            showTime = sw.Elapsed.TotalMilliseconds;            
+            //showTime = sw.Elapsed.TotalMilliseconds;            
             Thread.Sleep(1000);
             this.Dispatcher.BeginInvoke(DispatcherPriority.Background,new SetUIDelegate(unbindPic));
             ndiToStop = true;
@@ -140,7 +140,6 @@ namespace Resplaten
         }
 
         private void settipLabelVisibility() {
-            Console.WriteLine("setVisibility");
             if (tipLabel.Visibility == Visibility.Visible)
             {
                 tipLabel.Visibility = Visibility.Hidden;
@@ -367,10 +366,13 @@ namespace Resplaten
 
         private void Window_KeyUp(object sender, KeyEventArgs e)
         {
+            double uptime = sw.Elapsed.TotalMilliseconds;
             if (e.Key==Key.Space){
                 if (!hasRecordTime)
                 {
-                    releaseTime = sw.Elapsed.TotalMilliseconds;
+                    releaseTime = uptime;
+                    Console.WriteLine("showTime:"+showTime);
+                    Console.WriteLine("releaseTime:"+releaseTime);
                     storeData.addReactionTime(releaseTime - showTime);
                     hasRecordTime = true;
                 }

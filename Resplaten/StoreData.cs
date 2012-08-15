@@ -13,6 +13,7 @@ namespace Resplaten
     class StoreData
     {
         private const string excelFileDir = "d:\\ResplatenData\\"; //excel文件夹目录
+        private const float MAX_NEGATIVE = (float)-3.0E28;   //小于该值，Marker点MISS
         private const double keySpeed = 0.1;
 
         private  ApplicationClass excelApp = null;
@@ -73,35 +74,39 @@ namespace Resplaten
                 position3D1=allDataList[i].position1;
                 position3D2=allDataList[i].position2;
 
-                double distance = Math.Sqrt((position3D0.x - position3D1.x) * (position3D0.x - position3D1.x) + 
-                                            (position3D0.y - position3D1.y) * (position3D0.y - position3D1.y) +
-                                            (position3D0.z - position3D1.z) * (position3D0.z - position3D1.z));
+                if (position3D0.x > MAX_NEGATIVE && position3D1.x > MAX_NEGATIVE) {
+                    double distance = Math.Sqrt((position3D0.x - position3D1.x) * (position3D0.x - position3D1.x) +
+                                                (position3D0.y - position3D1.y) * (position3D0.y - position3D1.y) +
+                                                (position3D0.z - position3D1.z) * (position3D0.z - position3D1.z));
 
-                Console.WriteLine("distance:"+distance);
-                if (distance>maxGrasp){
-                    maxGrasp = distance;
+                    Console.WriteLine("distance:" + distance);
+                    if (distance > maxGrasp)
+                    {
+                        maxGrasp = distance;
+                    }                    
                 }
 
-                Console.WriteLine("x,y,z:" + position3D0.x + "  " + position3D0.y + "  " + position3D0.z);
-                Console.WriteLine("x,y,z:" + position3D1.x + "  " + position3D1.y + "  " + position3D1.z);
-                Console.WriteLine("x,y,z:" + position3D2.x + "  " + position3D2.y + "  " + position3D2.z);
-                double time = allDataList[i].timespan - oldtime;
-                Console.WriteLine("time:"+ allDataList[i].timespan + "   "+oldtime);
-                if (time != 0){
-                    double range = Math.Sqrt((position3D2.x - oldposition.x) * (position3D2.x - oldposition.x)+
-                                             (position3D2.y - oldposition.y) * (position3D2.y - oldposition.y)+
-                                             (position3D2.z - oldposition.z) * (position3D2.z - oldposition.z));
-                    double speed = range / time;
-                    double acce = (speed - oldspeed) / time;
-                    Console.WriteLine("speed:"+speed);
-                    Console.WriteLine("acce: "+acce);
-                    if (acce < 15 && acce > -15){
-                        if (speed>maxSpeed){
-                            maxSpeed = speed;
+                if (position3D2.x>MAX_NEGATIVE){
+                    double time = allDataList[i].timespan - oldtime;
+                    if (time != 0)
+                    {
+                        double range = Math.Sqrt((position3D2.x - oldposition.x) * (position3D2.x - oldposition.x) +
+                                                 (position3D2.y - oldposition.y) * (position3D2.y - oldposition.y) +
+                                                 (position3D2.z - oldposition.z) * (position3D2.z - oldposition.z));
+                        double speed = range / time;
+                        double acce = 1000 * (speed - oldspeed) / time;
+                        Console.WriteLine("speed:" + speed);
+                        Console.WriteLine("acce: " + acce);
+                        if (acce < 15 && acce > -15)
+                        {
+                            if (speed > maxSpeed)
+                            {
+                                maxSpeed = speed;
+                            }
+                            oldposition = position3D2;
+                            oldtime = allDataList[i].timespan;
+                            oldspeed = speed;
                         }
-                        oldposition = position3D2;
-                        oldtime = allDataList[i].timespan;
-                        oldspeed = speed;
                     }
                 }
             }

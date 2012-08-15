@@ -114,32 +114,46 @@ namespace Resplaten
             new string[]{"橙","绿","黄","紫","蓝","红"},
         };
         public static double getCorrectRate(string picname,string selectColor) {
-            double rate = 0;
+            double rate = 0.0;
             int selectColorNum = 0, rightColorNum = 0;
             string[] splitName = picname.Split('.');
             int picNum = Convert.ToInt32(splitName[0]);
+            Console.WriteLine("picName:"+picname);
             string[] selectColorList = selectColor.Split(',');
             if (picNum<colorinfo.Length){
+                int colorNum = colorinfo[picNum].Length;
                 foreach (string oneSelectColor in selectColorList)
                 {
                     if (oneSelectColor != "")
                     {
                         selectColorNum++;
-                        for (int i = 0; i < colorinfo[picNum].Length; i++)
+                        for (int i = 0; i < colorNum; i++)
                         {
                             if (oneSelectColor == colorinfo[picNum][i])
                             {
                                 rightColorNum++;
-                                break;
                             }
                         }
                     }
                 }
+                Console.WriteLine("rightNum:" + rightColorNum);
+                Console.WriteLine("selectcolorNum:" + selectColorNum);
+                Console.WriteLine("allColorNum:"+colorNum);
+                if (colorNum != 0)
+                {
+                    rate = rightColorNum / Convert.ToDouble(colorNum);
+                }
+                else {
+                    if (selectColorNum == 0)
+                    {
+                        rate = 1;
+                    }
+                    else {
+                        rate = 0;
+                    }
+                }
             }
 
-            if (selectColorNum!=0){
-                rate = rightColorNum / selectColorNum;
-            }
             return rate;
         }
     }
